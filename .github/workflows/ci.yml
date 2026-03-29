@@ -2,9 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [tesing]
-  pull_request:
-    branches: [main]
+    branches: [testing]
 
 jobs:
   validate:
@@ -41,17 +39,19 @@ jobs:
       - name: Validate JS
         run: eslint .
 
-  merge:
-    name: Merge & Deploy
+      - name: Success message
+        run: echo "✅ Code is valid. Ready to merge."
+
+  merge_and_deploy:
     needs: validate
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && success()
+    if: success()
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Merge PR to main
+      - name: Merge testing → main (AUTO FIX CONFLICTS)
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -61,6 +61,6 @@ jobs:
           git checkout main
           git reset --hard origin/main
 
-          git merge -X theirs origin/tesing --allow-unrelated-histories -m "Auto merge PR"
+          git merge -X theirs origin/testing --allow-unrelated-histories -m "Auto merge testing to main"
 
           git push origin main
