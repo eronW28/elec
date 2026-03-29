@@ -12,14 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Node
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
       - name: Install validators
         run: |
-          npm install -g htmlhint stylelint eslint
+          npm install -g htmlhint eslint
+          npm install -g stylelint stylelint-config-standard
 
       - name: Validate HTML
         run: htmlhint .
