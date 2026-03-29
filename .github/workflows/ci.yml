@@ -1,0 +1,66 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [testing]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install validators
+        run: |
+          npm install -g htmlhint eslint
+          npm install -g stylelint stylelint-config-standard
+
+      - name: Create Stylelint config
+        run: |
+          echo '{ "extends": "stylelint-config-standard", "rules": { "color-hex-length": null, "color-function-notation": null, "alpha-value-notation": null, "color-function-alias-notation": null, "no-descending-specificity": null, "media-feature-range-notation": null } }' > .stylelintrc.json
+
+      - name: Create ESLint config
+        run: |
+          echo 'module.exports = [{ files: ["**/*.js"], languageOptions: { ecmaVersion: 2021, sourceType: "module", globals: { document: "readonly", window: "readonly", console: "readonly", navigator: "readonly", confirm: "readonly", setTimeout: "readonly", clearTimeout: "readonly" } }, rules: { "no-unused-vars": "warn", "no-undef": "off" } }];' > eslint.config.js
+
+      - name: Validate HTML
+        run: htmlhint .
+
+      - name: Validate CSS
+        run: stylelint "**/*.css"
+
+      - name: Validate JS
+        run: eslint .
+
+      - name: Success message
+        run: echo "✅ Code is valid. Ready to merge."
+
+  merge:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Merge testing → main (AUTO FIX CONFLICTS)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git fetch origin
+
+          git checkout main
+          git reset --hard origin/main
+
+          git merge -X theirs origin/testing --allow-unrelated-histories -m "Auto merge testing to main"
+
+          git push origin main
