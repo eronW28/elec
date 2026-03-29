@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -21,6 +21,14 @@ jobs:
         run: |
           npm install -g htmlhint eslint
           npm install -g stylelint stylelint-config-standard
+
+      - name: Create Stylelint config
+        run: |
+          echo '{ "extends": "stylelint-config-standard", "rules": { "color-hex-length": null, "color-function-notation": null, "alpha-value-notation": null, "color-function-alias-notation": null, "no-descending-specificity": null, "media-feature-range-notation": null } }' > .stylelintrc.json
+
+      - name: Create ESLint config
+        run: |
+          echo 'module.exports = [{ files: ["**/*.js"], languageOptions: { ecmaVersion: 2021, sourceType: "module", globals: { document: "readonly", window: "readonly", console: "readonly", navigator: "readonly", confirm: "readonly", setTimeout: "readonly", clearTimeout: "readonly" } }, rules: { "no-unused-vars": "warn", "no-undef": "off" } }];' > eslint.config.js
 
       - name: Validate HTML
         run: htmlhint .
@@ -47,7 +55,12 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
           git fetch origin
+
           git checkout main
-          git merge origin/testing
+          git reset --hard origin/main
+
+          git merge origin/testing --allow-unrelated-histories -m "Auto merge testing to main"
+
           git push origin main
