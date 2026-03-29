@@ -42,7 +42,7 @@ jobs:
       - name: Success message
         run: echo "✅ Code is valid. Ready to merge."
 
-  merge:
+  merge and deploy:
     needs: validate
     runs-on: ubuntu-latest
     if: success()
