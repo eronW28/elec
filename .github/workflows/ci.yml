@@ -51,7 +51,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Merge testing → main
+      - name: Merge testing → main (AUTO FIX CONFLICTS)
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -61,6 +61,6 @@ jobs:
           git checkout main
           git reset --hard origin/main
 
-          git merge origin/testing --allow-unrelated-histories -m "Auto merge testing to main"
+          git merge -X theirs origin/testing --allow-unrelated-histories -m "Auto merge testing to main"
 
           git push origin main
