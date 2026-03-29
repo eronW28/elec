@@ -25,8 +25,8 @@ jobs:
       - name: Validate HTML
         run: htmlhint .
 
-      - name: Fix CSS automatically
-        run: stylelint "**/*.css" --fix
+      - name: Validate CSS
+        run: stylelint "**/*.css"
 
       - name: Validate JS
         run: eslint .
